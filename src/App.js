@@ -11,7 +11,6 @@ const App = () => {
   const [list, setList] = useState(items);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState("");
-  const [alert, SetAlert] = useState({ show: false, msg: "", type: "" });
 
   useEffect(() => {
     localStorage.setItem("item", JSON.stringify(list));
