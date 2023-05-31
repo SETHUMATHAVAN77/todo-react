@@ -1,24 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
+
 import List from "./components/List";
 
-let items = localStorage.getItem("items")
-  ? JSON.parse(localStorage.getItem("items"))
-  : [];
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "./utils/firebase/firebase";
 
 const App = () => {
   const [itemName, setItemName] = useState("");
-  const [list, setList] = useState(items);
+  const [list, setList] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState("");
 
   useEffect(() => {
-    localStorage.setItem("item", JSON.stringify(list));
-  }, [list]);
+    const q = query(collection(db, "tasks"), orderBy("created", "desc"));
 
-  const deleteItem = (id) => {
-    const filteredItems = list.filter((item) => item.id !== id);
-    setList(filteredItems);
+    onSnapshot(q, (querySnapShot) => {
+      setList(
+        querySnapShot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+          };
+        })
+      );
+    });
+
+    console.log(list);
+  }, []);
+
+  const deleteItem = async (id) => {
+    try {
+      const itemToEditRef = await doc(db, "tasks", id);
+      await deleteDoc(itemToEditRef);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const editItem = (id) => {
@@ -32,27 +59,34 @@ const App = () => {
     setList([]);
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     if (!itemName) {
       alert("Enter A value");
     } else if (itemName && isEditing) {
-      setList(
-        list.map((item) => {
-          if (item.id === editId) {
-            return { ...item, title: itemName };
-          } else {
-            return item;
-          }
-        })
-      );
+      try {
+        const itemToEditRef = await doc(db, "tasks", editId);
+        await updateDoc(itemToEditRef, {
+          title: itemName,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+
       setItemName("");
       setIsEditing(false);
       setEditId("");
     } else {
-      const newItem = { id: uuidv4(), title: itemName };
-      setList([...list, newItem]);
       setItemName("");
+
+      try {
+        await addDoc(collection(db, "tasks"), {
+          title: itemName,
+          created: Timestamp.now(),
+        });
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
   return (
@@ -66,7 +100,7 @@ const App = () => {
             <input
               type="text"
               className="grocery"
-              placeholder="Hello..."
+              placeholder="Apple..."
               value={itemName}
               onChange={(e) => {
                 setItemName(e.target.value);
@@ -77,6 +111,7 @@ const App = () => {
             </button>
           </div>
         </form>
+        {/* {console.log(list)} */}
         {list.length > 0 && (
           <div className="grocery-container">
             <List items={list} deleteItem={deleteItem} editItem={editItem} />

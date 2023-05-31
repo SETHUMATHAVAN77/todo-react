@@ -9,23 +9,25 @@ const list = ({ items, deleteItem, editItem }) => {
         const { id, title } = item;
         return (
           <article className="grocery-item" key={id}>
-            <div className="flex">
+            <div>
               <p className="title">{title}</p>
-              <div className="btn-container">
-                <button
-                  type="button"
-                  className="edit-btn"
-                  onClick={() => editItem(id)}
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  type="button"
-                  className="delete-btn"
-                  onClick={() => deleteItem(id)}
-                >
-                  <FaTrash />
-                </button>
+              <div className="flex">
+                <div className="btn-container">
+                  <button
+                    type="button"
+                    className="edit-btn"
+                    onClick={() => editItem(id)}
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    type="button"
+                    className="delete-btn"
+                    onClick={() => deleteItem(id)}
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
               </div>
             </div>
           </article>
