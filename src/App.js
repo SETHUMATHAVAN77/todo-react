@@ -37,6 +37,7 @@ const App = () => {
     });
 
     console.log(list);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const deleteItem = async (id) => {
